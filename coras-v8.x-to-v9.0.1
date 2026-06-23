@@ -1,0 +1,167 @@
+{
+  "_doc": "Coras Framework Migration Rules — v8.0.6 → v9.0.1. Source of truth for the AI agent. Authored from the version announcement (08/07/2025) and CHANGELOG.md. Run in dry_run mode first. See AGENTS.md for full schema documentation.",
+
+  "migration_meta": {
+    "coras_from_version": "8.0.6",
+    "coras_to_version":   "9.0.1",
+    "angular_base_version": "19",
+    "ag_grid_version":      "19",
+    "created_by":    "Meenakshi Sundaram",
+    "created_date":  "2026-06-19",
+    "announcement_ref": "Internal channel — VERSION RELEASE 9.0.1 — 08/07/2025",
+    "changelog_ref": "CHANGELOG.md — develop — Wholesale/CIB/BP2S/devtools/ssjs_frmk — Version 9.0.1 — 08/07/2025",
+    "notes": "v9.0.1 introduces: Dark/Light theme (coras-theme attribute required on <body>); Angular 19 / AG Grid 19 support (AG 18 also supported); column-level hamburger hide (TCAAS1443-645); retain selected records on lazy pagination (TCAAS1443-640); internationalization text support (TCAAS1443-635); Coras Component Popup Menu improvements (TCAAS1443-620); Coras Tree structural improvements (TCAAS1443-622, manual review)."
+  },
+
+  "package_json_updates": {
+    "_doc": "Core @frmk2sjs packages are ALWAYS updated. Conditional coras-for-* packages are only bumped if they already exist in the target project — the agent will not install them fresh.",
+
+    "dependencies": {
+      "@frmk2sjs/services":  "9.0.1",
+      "@frmk2sjs/core":      "9.0.1",
+      "@frmk2sjs/component": "9.0.1"
+    },
+
+    "conditional_dependencies": {
+      "_doc": "Only update these if the key already exists in the target project's package.json dependencies or devDependencies. Never add a new entry.",
+      "coras-for-angular-material":   "9.0.1",
+      "coras-for-ag-grid-community":  "9.0.1",
+      "coras-for-ag-grid-enterprise": "9.0.1",
+      "coras-for-primeNG":            "9.0.1",
+      "coras-for-highcharts":         "9.0.1"
+    }
+  },
+
+  "index_html_updates": {
+    "_doc": "Required in v9.0.1: all consuming applications must declare a default theme on the <body> element. Introduced with the Dark/Light theme feature.",
+    "rule_id": "CORAS-THEME-001",
+    "jira_ticket": "CORAS-THEME-2025",
+
+    "body_attributes": {
+      "coras-theme": "light"
+    },
+
+    "ai_instruction": "Locate the <body> tag in src/index.html. If it does not already have a 'coras-theme' attribute, add coras-theme='light' to the opening tag. IMPORTANT: If a coras-theme attribute already exists with ANY value (including 'dark'), do NOT overwrite it. Instead add a WARNING to the report: 'coras-theme already set to [existing value], preserved unchanged — please confirm this is the intended theme'. The <app-root></app-root> element inside the body must be preserved exactly. All other existing body attributes must be preserved.",
+
+    "example_before": "<body>\n  <app-root></app-root>\n</body>",
+    "example_after":  "<body coras-theme=\"light\">\n  <app-root></app-root>\n</body>",
+
+    "notes": "Apps that should default to dark theme: set coras-theme='dark'. This was discussed in the Dark & Light Introduction meeting referenced in the v9.0.1 announcement. The safe default for all new apps is 'light'."
+  },
+
+  "code_migration_rules": {
+    "_doc": "LLM-powered rules applied to .ts and .html files. For each file, the agent pre-filters using detect_pattern (fast grep) before invoking the LLM. Only files where a pattern matches incur an LLM API call.",
+
+    "typescript_rules": [
+      {
+        "id": "CORAS-TS-001",
+        "name": "Add i18n config to CorasGridConfig objects",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-635",
+        "detect_pattern": "CorasGridConfig",
+        "ai_instruction": "Find TypeScript object literals that are typed as CorasGridConfig or assigned to variables of that type. In v9.0.1, internationalization is supported via a new 'i18n' configuration property. If such an object does not already have an 'i18n' or 'locale' property, add 'i18n: { enabled: true }' as a new property at the end of the object literal. Do not change objects that already declare 'i18n' or 'locale'. Do not add this property to any object that is not a CorasGridConfig. Preserve all existing properties, their values, and their order exactly.",
+        "example_before": "const gridConfig: CorasGridConfig = {\n  pagination: true,\n  pageSize: 25\n};",
+        "example_after":  "const gridConfig: CorasGridConfig = {\n  pagination: true,\n  pageSize: 25,\n  i18n: { enabled: true }\n};"
+      },
+
+      {
+        "id": "CORAS-TS-002",
+        "name": "CorasPopupMenuService — update import path",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-620",
+        "detect_pattern": "CorasPopupMenuService",
+        "ai_instruction": "Find import statements that import CorasPopupMenuService from '@frmk2sjs/component/popup'. Rename the module specifier to '@frmk2sjs/component/menu'. The imported symbol name stays unchanged. If the import is already from '@frmk2sjs/component/menu', leave the file unchanged. Do not change any other imports or any code that uses the service.",
+        "example_before": "import { CorasPopupMenuService } from '@frmk2sjs/component/popup';",
+        "example_after":  "import { CorasPopupMenuService } from '@frmk2sjs/component/menu';"
+      },
+
+      {
+        "id": "CORAS-TS-003",
+        "name": "Add retainSelection to lazy-load grid configs",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-640",
+        "detect_pattern": "lazyLoad",
+        "ai_instruction": "Find TypeScript configuration objects that contain 'lazyLoad: true'. These are Coras grid or table configuration objects. If such an object does not already have a 'retainSelection' property, add 'retainSelection: true' on the line immediately following 'lazyLoad: true'. Only modify objects where lazyLoad is explicitly set to true (boolean, not a string). Leave objects where lazyLoad is false or absent completely unchanged. Preserve all other properties and their values exactly.",
+        "example_before": "const config = {\n  lazyLoad: true,\n  pageSize: 50\n};",
+        "example_after":  "const config = {\n  lazyLoad: true,\n  retainSelection: true,\n  pageSize: 50\n};"
+      }
+    ],
+
+    "html_rules": [
+      {
+        "id": "CORAS-HTML-001",
+        "name": "Enable column hamburger hide on coras-grid",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-645",
+        "detect_pattern": "coras-grid",
+        "ai_instruction": "Find all <coras-grid> elements in HTML templates. If a <coras-grid> element does not already have a [showColumnMenu] attribute or binding, add [showColumnMenu]=\"true\" as a new attribute. Place it after the last existing input binding. If [showColumnMenu] is already present with any value, leave the element unchanged. Do not add this attribute to any element that is not <coras-grid>. Preserve all existing attributes and their order.",
+        "example_before": "<coras-grid [columnDefs]=\"columnDefs\" [rowData]=\"rows\"></coras-grid>",
+        "example_after":  "<coras-grid [columnDefs]=\"columnDefs\" [rowData]=\"rows\" [showColumnMenu]=\"true\"></coras-grid>"
+      },
+
+      {
+        "id": "CORAS-HTML-002",
+        "name": "Enable retainSelection on lazy-paginated grids",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-640",
+        "detect_pattern": "[lazy]",
+        "ai_instruction": "Find <coras-grid> or <coras-table> elements that have the binding [lazy]=\"true\" or [lazy]='true'. If such an element does not already have a [retainSelection] attribute, add [retainSelection]=\"true\" as a new attribute immediately after the [lazy] binding. Only modify elements that explicitly have [lazy]=\"true\". Elements without a lazy binding must not be touched. Preserve all other attributes and their values exactly.",
+        "example_before": "<coras-grid [lazy]=\"true\" [columnDefs]=\"cols\" [rowData]=\"data\"></coras-grid>",
+        "example_after":  "<coras-grid [lazy]=\"true\" [retainSelection]=\"true\" [columnDefs]=\"cols\" [rowData]=\"data\"></coras-grid>"
+      },
+
+      {
+        "id": "CORAS-HTML-003",
+        "name": "Popup menu — rename [popupItems] to [menuItems]",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-620",
+        "detect_pattern": "popupItems",
+        "ai_instruction": "Find all HTML elements with the attribute or binding [popupItems]. In v9.0.1, the <coras-popup-menu> component renamed this input from [popupItems] to [menuItems]. Rename [popupItems] to [menuItems] on every occurrence. The bound expression value must remain exactly unchanged — only the attribute name changes. Do not modify any other attributes, event bindings, or elements. If [menuItems] is already present on an element, skip it.",
+        "example_before": "<coras-popup-menu [popupItems]=\"actionItems\" (menuItemClick)=\"onAction($event)\"></coras-popup-menu>",
+        "example_after":  "<coras-popup-menu [menuItems]=\"actionItems\" (menuItemClick)=\"onAction($event)\"></coras-popup-menu>"
+      },
+
+      {
+        "id": "CORAS-HTML-004",
+        "name": "Add locale binding to coras-grid for i18n",
+        "enabled": true,
+        "jira_ticket": "TCAAS1443-635",
+        "detect_pattern": "coras-grid",
+        "ai_instruction": "Find <coras-grid> elements that do not already have a [locale] or [i18nConfig] binding. Add [locale]=\"currentLocale\" as a new attribute. If the component's TypeScript context makes it clear that currentLocale is not declared (e.g., there is no mention of locale anywhere in the template or a nearby TS excerpt), use [locale]=\"'en-US'\" as the default value and add an HTML comment on the line immediately above the element: <!-- TODO: wire up dynamic locale for i18n (TCAAS1443-635) -->. Do not touch elements that already have [locale] or [i18nConfig]. Preserve all other attributes.",
+        "example_before": "<coras-grid [columnDefs]=\"cols\" [rowData]=\"data\"></coras-grid>",
+        "example_after":  "<coras-grid [columnDefs]=\"cols\" [rowData]=\"data\" [locale]=\"currentLocale\"></coras-grid>"
+      },
+
+      {
+        "id": "CORAS-HTML-005",
+        "name": "Coras Tree structural improvements — flag for manual review",
+        "enabled": false,
+        "jira_ticket": "TCAAS1443-622",
+        "detect_pattern": "coras-tree",
+        "ai_instruction": "RULE IS DISABLED (enabled: false). The Coras Tree component received internal structural improvements in v9.0.1 that may affect application-specific CSS and layout. Do NOT apply any automatic code changes. Instead: (1) Add an HTML comment immediately above each <coras-tree> element: <!-- TODO: Verify layout after v9.0.1 Coras Tree structural improvements (TCAAS1443-622) -->. (2) Log the file path in the report under 'manual_review_required'. A human engineer must visually review each tree usage after the migration and confirm that the layout is unaffected.",
+        "example_before": "<coras-tree [nodes]=\"treeData\" [config]=\"treeConfig\"></coras-tree>",
+        "example_after":  "<!-- TODO: Verify layout after v9.0.1 Coras Tree structural improvements (TCAAS1443-622) -->\n<coras-tree [nodes]=\"treeData\" [config]=\"treeConfig\"></coras-tree>"
+      }
+    ]
+  },
+
+  "validation_rules": {
+    "_doc": "Automated checks run after all file transforms complete. Failures are logged as errors in the report. Warnings do not block the report but must be addressed before the PR is merged.",
+
+    "checks": [
+      "package.json: @frmk2sjs/services version equals 9.0.1",
+      "package.json: @frmk2sjs/core version equals 9.0.1",
+      "package.json: @frmk2sjs/component version equals 9.0.1",
+      "package.json: any present coras-for-* dependencies equal 9.0.1",
+      "src/index.html: <body> element has a coras-theme attribute",
+      "No .html files contain the binding [popupItems] after CORAS-HTML-003",
+      "No .ts files import CorasPopupMenuService from '@frmk2sjs/component/popup' after CORAS-TS-002",
+      "TypeScript compiles without errors (tsc --noEmit) — verified by build agent"
+    ],
+
+    "manual_review_flags": [
+      "All files containing <coras-tree> (CORAS-HTML-005 disabled — visual QA required)",
+      "All index.html files where existing coras-theme value was preserved unchanged"
+    ]
+  }
+}
