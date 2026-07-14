@@ -1,0 +1,77 @@
+{
+  "html_rules": [
+    {
+      "id": "HTML001",
+      "name": "Add coras-theme attribute to body tag",
+      "enabled": true,
+      "description": "v9.0.1 introduces Dark and Light theme support. The default theme must be declared on the <body> element in index.html. Without this attribute the application will have no theme applied.",
+      "detect_pattern": "<body",
+      "ai_instruction": "Locate the <body> tag in src/index.html. If it does not already have a coras-theme attribute, add coras-theme='light' as the default. If coras-theme already exists with any value, do NOT overwrite it — add a warning comment above the tag: <!-- WARNING: coras-theme already set, verify this is the intended theme for v9.0.1 --> and leave the value unchanged.",
+      "example_before": "<body>\n  <app-root></app-root>\n</body>",
+      "example_after": "<body coras-theme=\"light\">\n  <app-root></app-root>\n</body>"
+    }
+  ],
+
+  "package_rules": [
+    {
+      "id": "PKG001",
+      "name": "Update @frmk2sjs/services to 9.0.1",
+      "enabled": true,
+      "description": "Core Coras services package must be updated to 9.0.1 as part of this release.",
+      "detect_pattern": "@frmk2sjs/services",
+      "ai_instruction": "In package.json, find the @frmk2sjs/services dependency. Update its version to exactly '9.0.1'. Do not change any other dependency. Do not change the key name.",
+      "example_before": "\"@frmk2sjs/services\": \"8.0.6\"",
+      "example_after": "\"@frmk2sjs/services\": \"9.0.1\""
+    },
+    {
+      "id": "PKG002",
+      "name": "Update @frmk2sjs/core to 9.0.1",
+      "enabled": true,
+      "description": "Core Coras base classes and decorators package must be updated to 9.0.1.",
+      "detect_pattern": "@frmk2sjs/core",
+      "ai_instruction": "In package.json, find the @frmk2sjs/core dependency. Update its version to exactly '9.0.1'. Do not change any other dependency.",
+      "example_before": "\"@frmk2sjs/core\": \"8.0.6\"",
+      "example_after": "\"@frmk2sjs/core\": \"9.0.1\""
+    },
+    {
+      "id": "PKG003",
+      "name": "Update @frmk2sjs/component to 9.0.1",
+      "enabled": true,
+      "description": "Coras component library package must be updated to 9.0.1.",
+      "detect_pattern": "@frmk2sjs/component",
+      "ai_instruction": "In package.json, find the @frmk2sjs/component dependency. Update its version to exactly '9.0.1'. Do not change any other dependency.",
+      "example_before": "\"@frmk2sjs/component\": \"8.0.6\"",
+      "example_after": "\"@frmk2sjs/component\": \"9.0.1\""
+    },
+    {
+      "id": "PKG004",
+      "name": "Update coras-for-angular-material to 9.0.1 (conditional)",
+      "enabled": true,
+      "description": "Angular Material adapter — only update if this package already exists in the target project. Do not install it fresh.",
+      "detect_pattern": "coras-for-angular-material",
+      "ai_instruction": "In package.json, check if coras-for-angular-material exists in dependencies or devDependencies. If it exists, update the version to '9.0.1'. If it does not exist, skip this rule entirely — do not add it.",
+      "example_before": "\"coras-for-angular-material\": \"8.0.6\"",
+      "example_after": "\"coras-for-angular-material\": \"9.0.1\""
+    },
+    {
+      "id": "PKG005",
+      "name": "Update coras-for-ag-grid-community to 9.0.1 (conditional)",
+      "enabled": true,
+      "description": "AG Grid Community wrapper — v9.0.1 supports both AG Grid 18 and AG Grid 19. Only update if already present in the project.",
+      "detect_pattern": "coras-for-ag-grid-community",
+      "ai_instruction": "In package.json, check if coras-for-ag-grid-community exists in dependencies or devDependencies. If it exists, update the version to '9.0.1'. If it does not exist, skip this rule — do not add it. Note: this version is compatible with both AG Grid 18 and AG Grid 19 applications.",
+      "example_before": "\"coras-for-ag-grid-community\": \"8.0.6\"",
+      "example_after": "\"coras-for-ag-grid-community\": \"9.0.1\""
+    },
+    {
+      "id": "PKG006",
+      "name": "Update coras-for-ag-grid-enterprise to 9.0.1 (conditional)",
+      "enabled": true,
+      "description": "AG Grid Enterprise wrapper — v9.0.1 supports both AG Grid 18 and AG Grid 19. Only update if already present in the project.",
+      "detect_pattern": "coras-for-ag-grid-enterprise",
+      "ai_instruction": "In package.json, check if coras-for-ag-grid-enterprise exists in dependencies or devDependencies. If it exists, update the version to '9.0.1'. If it does not exist, skip this rule — do not add it. Note: this version is compatible with both AG Grid 18 and AG Grid 19 applications.",
+      "example_before": "\"coras-for-ag-grid-enterprise\": \"8.0.6\"",
+      "example_after": "\"coras-for-ag-grid-enterprise\": \"9.0.1\""
+    }
+  ]
+}
